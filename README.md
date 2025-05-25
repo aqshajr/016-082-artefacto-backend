@@ -71,6 +71,7 @@ Server akan berjalan di `http://localhost:3000` dengan fitur hot-reload.
 
 
 ## 📁 Struktur Direktori
+```
    artefacto-backend/
    ├── config/          # Konfigurasi database dan aplikasi
    ├── controllers/     # Logic controller untuk setiap route
@@ -80,7 +81,7 @@ Server akan berjalan di `http://localhost:3000` dengan fitur hot-reload.
    ├── server.js        # Entry point aplikasi
    ├── package.json     # Dependensi dan skrip
    └── README.md        # Dokumentasi proyek
-
+```
 
 ## 🔑 Endpoint API
 
