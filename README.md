@@ -71,15 +71,15 @@ Server akan berjalan di `http://localhost:3000` dengan fitur hot-reload.
 
 
 ## 📁 Struktur Direktori
-artefacto-backend/
-├── config/          # Konfigurasi database dan aplikasi
-├── controllers/     # Logic controller untuk setiap route
-├── middlewares/     # Middleware Express (auth, validation, dll)
-├── models/          # Model Sequelize
-├── routes/          # Definisi route API
-├── server.js        # Entry point aplikasi
-├── package.json     # Dependensi dan skrip
-└── README.md        # Dokumentasi proyek
+   artefacto-backend/
+   ├── config/          # Konfigurasi database dan aplikasi
+   ├── controllers/     # Logic controller untuk setiap route
+   ├── middlewares/     # Middleware Express (auth, validation, dll)
+   ├── models/          # Model Sequelize
+   ├── routes/          # Definisi route API
+   ├── server.js        # Entry point aplikasi
+   ├── package.json     # Dependensi dan skrip
+   └── README.md        # Dokumentasi proyek
 
 
 ## 🔑 Endpoint API
