@@ -1,0 +1,327 @@
+### Variables
+@baseUrl = http://localhost:8080/api
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiZW1haWwiOiJ0ZXNAdGVzLmNvbSIsImlhdCI6MTc0ODE5ODUxMCwiZXhwIjoxNzQ4Mjg0OTEwfQ.LtDDMXtRNEDyVeGrB7_BXJBBk7j_HTJW6yifMvKYc94
+
+### AUTH ENDPOINTS ###
+
+### Register new user
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "username": "tes",
+    "email": "tes@tes.com",
+    "password": "password123",
+    "passwordConfirmation": "password123"
+}
+
+### Login user
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "tes@tes.com",
+    "password": "password123"
+}
+
+### Get user profile
+GET {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}}
+
+### Update user profile
+PUT {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="username"
+
+newUsername
+------WebKitFormBoundary
+Content-Disposition: form-data; name="email"
+
+newemail@example.com
+------WebKitFormBoundary
+Content-Disposition: form-data; name="currentPassword"
+
+password123
+------WebKitFormBoundary
+Content-Disposition: form-data; name="newPassword"
+
+newpassword123
+------WebKitFormBoundary
+Content-Disposition: form-data; name="profilePicture"; filename="profile.jpg"
+Content-Type: image/jpeg
+
+< ./coba.jpg
+------WebKitFormBoundary--
+
+### Delete user account
+DELETE {{baseUrl}}/auth/profile
+Authorization: Bearer {{authToken}}
+
+### TEMPLE ENDPOINTS ###
+
+### Get all temples
+GET {{baseUrl}}/temples
+Authorization: Bearer {{authToken}}
+
+### Get temple by ID
+GET {{baseUrl}}/temples/1
+Authorization: Bearer {{authToken}}
+
+### Create new temple (Admin only)
+POST {{baseUrl}}/temples
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="title"
+
+Borobudur
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+Borobudur is the largest Buddhist temple in the world, located in Central Java, Indonesia. Constructed in the 9th century during the Sailendra dynasty, it consists of nine stacked platforms topped by a central dome. The temple is adorned with 2,672 relief panels and 504 Buddha statues, depicting the journey to enlightenment. The structure reflects the Buddhist concept of the cosmos and serves as both a shrine to Buddha and a pilgrimage site for devotees.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactTitle"
+
+The Secret of Borobudur`s Stone Reliefs
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactDescription"
+
+Did you know? Hidden beneath the main structure of Borobudur lies a series of \"Karmawibhangga\" reliefs, depicting the law of karma. These reliefs were buried during a renovation to strengthen the temple`s foundation, but some panels are still visible for visitors today.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="locationUrl"
+
+https://maps.app.goo.gl/sbSkwtz68k8buiwk7
+------WebKitFormBoundary
+Content-Disposition: form-data; name="image"; filename="temple.jpg"
+Content-Type: image/jpeg
+
+< ./borobudur.jpg
+------WebKitFormBoundary--
+
+### Update temple (Admin only)
+PUT {{baseUrl}}/temples/17
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="title"
+
+Candi Prambanan
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+edited-Candi Hindu terbesar yang ada di Indonesia dan salah satu yang terindah di Asia Tenggara.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactTitle"
+
+Legenda Roro Jonggrang
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactDescription"
+
+Candi Prambanan memiliki legenda terkenal tentang Roro Jonggrang dan Bandung Bondowoso yang berkaitan dengan pembangunan 1000 candi dalam semalam.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="locationUrl"
+
+https://maps.app.goo.gl/updated-example
+------WebKitFormBoundary
+Content-Disposition: form-data; name="image"; filename="temple.jpg"
+Content-Type: image/jpeg
+
+< ./prambanan.jpg
+------WebKitFormBoundary--
+
+### Delete temple (Admin only)
+DELETE {{baseUrl}}/temples/1
+Authorization: Bearer {{authToken}}
+
+### ARTIFACT ENDPOINTS ###
+
+### Get all artifacts
+GET {{baseUrl}}/artifacts
+Authorization: Bearer {{authToken}}
+
+### Get artifact by ID
+GET {{baseUrl}}/artifacts/5
+Authorization: Bearer {{authToken}}
+
+### Create new artifact (Admin only)
+POST {{baseUrl}}/artifacts
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="templeID"
+
+1
+------WebKitFormBoundary
+Content-Disposition: form-data; name="title"
+
+5- Arca Buddha Dhyani
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+Arca Buddha dengan posisi duduk bersila dan tangan dalam posisi dhyanamudra, menggambarkan Buddha dalam keadaan meditasi.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailPeriod"
+
+Abad ke-8 Masehi
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailMaterial"
+
+Batu andesit
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailSize"
+
+Tinggi 120 cm x Lebar 80 cm
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailStyle"
+
+Gaya Sailendra
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactTitle"
+
+Mudra yang Bermakna
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactDescription"
+
+Posisi tangan (mudra) pada arca Buddha memiliki makna khusus. Dhyanamudra melambangkan meditasi dan konsentrasi spiritual.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="locationUrl"
+
+https://maps.app.goo.gl/artifact-location
+------WebKitFormBoundary
+Content-Disposition: form-data; name="image"; filename="artifact.jpg"
+Content-Type: image/jpeg
+
+< ./coba.jpg
+------WebKitFormBoundary--
+
+### Update artifact (Admin only)
+PUT {{baseUrl}}/artifacts/5
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="title"
+
+Arca Dhyani Buddha Vairocana
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+edited-Arca Buddha utama yang melambangkan kebijaksanaan tertinggi dalam ajaran Buddha Mahayana.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailPeriod"
+
+Abad ke-9 Masehi
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailMaterial"
+
+Batu andesit berkualitas tinggi
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailSize"
+
+Tinggi 150 cm x Lebar 100 cm
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailStyle"
+
+Gaya Klasik Tengah Jawa
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactTitle"
+
+Buddha Tertinggi
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactDescription"
+
+Vairocana dianggap sebagai Buddha tertinggi dalam pantheon Buddha Mahayana, yang mewakili elemen ether dan kesadaran universal.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="locationUrl"
+
+https://maps.app.goo.gl/updated-artifact-location
+------WebKitFormBoundary
+Content-Disposition: form-data; name="image"; filename="artifact.jpg"
+Content-Type: image/jpeg
+
+< ./prambanan.jpg
+------WebKitFormBoundary--
+
+### Delete artifact (Admin only)
+DELETE {{baseUrl}}/artifacts/5
+Authorization: Bearer {{authToken}}
+
+### Toggle artifact bookmark
+POST {{baseUrl}}/artifacts/2/bookmark
+Authorization: Bearer {{authToken}}
+
+### Toggle artifact read status
+POST {{baseUrl}}/artifacts/2/read
+Authorization: Bearer {{authToken}}
+
+### TICKET ENDPOINTS ###
+
+### Get all tickets
+GET {{baseUrl}}/tickets
+Authorization: Bearer {{authToken}}
+
+### Get ticket by ID
+GET {{baseUrl}}/tickets/3
+Authorization: Bearer {{authToken}}
+
+### Create new ticket (Admin only)
+POST {{baseUrl}}/tickets
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "templeID": 1,
+    "description": "Tiket masuk untuk pengunjung Anak Anak",
+    "price": 50000
+}
+
+### Update ticket (Admin only)
+PUT {{baseUrl}}/tickets/5
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "description": "Updated ticket description",
+    "price": 75000
+}
+
+### Delete ticket (Admin only)
+DELETE {{baseUrl}}/tickets/4
+Authorization: Bearer {{authToken}}
+
+### TRANSACTION ENDPOINTS ###
+
+### Get all transactions
+GET {{baseUrl}}/transactions
+Authorization: Bearer {{authToken}}
+
+### Get transaction by ID
+GET {{baseUrl}}/transactions/1
+Authorization: Bearer {{authToken}}
+
+### Create new transaction
+POST {{baseUrl}}/transactions
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "ticketID": 3,
+    "ticketQuantity": 5,
+    "validDate": "2025-12-31"
+}
+
+### OWNED TICKET ENDPOINTS ###
+
+### Get all owned tickets
+GET {{baseUrl}}/owned-tickets
+Authorization: Bearer {{authToken}}
+
+### Get owned ticket by ID
+GET {{baseUrl}}/owned-tickets/2
+Authorization: Bearer {{authToken}} 

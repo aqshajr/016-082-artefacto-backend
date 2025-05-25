@@ -1,0 +1,33 @@
+# Dependensi
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Variabel Lingkungan
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Sistem Operasi
+.DS_Store
+Thumbs.db
+
+# Log
+logs
+*.log
+
+# Output Build
+dist/
+build/
+
+# Google Cloud
+*.json
+!package.json
+!package-lock.json
