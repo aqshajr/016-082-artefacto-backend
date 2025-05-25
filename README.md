@@ -43,6 +43,7 @@ Sebelum menjalankan proyek ini, pastikan Anda telah menginstal:
    
 
 3. Buat file .env di root direktori dan isi dengan konfigurasi berikut:
+   ```
    env
    DB_HOST=localhost
    DB_USER=your_username
@@ -51,9 +52,10 @@ Sebelum menjalankan proyek ini, pastikan Anda telah menginstal:
    JWT_SECRET=your_jwt_secret
    GOOGLE_CLOUD_PROJECT_ID=your_project_id
    GOOGLE_CLOUD_STORAGE_BUCKET=your_bucket_name
+   ```
 
 
-4. Siapkan database MySQL:
+5. Siapkan database MySQL:
    - Buat database baru dengan nama sesuai DB_NAME di file .env
    - Struktur database akan dibuat otomatis oleh Sequelize
 
