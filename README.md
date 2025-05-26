@@ -4,14 +4,14 @@
 Artefacto Backend adalah layanan backend untuk proyek Artefacto yang dibangun menggunakan Node.js dan Express.js. Sistem ini menyediakan API untuk mengelola data artefak budaya dengan fitur autentikasi, manajemen data, dan integrasi dengan Google Cloud Storage.
 
 ## 🚀 Fitur Utama
-- Autentikasi dan Otorisasi menggunakan JWT
-- Upload dan manajemen file menggunakan Multer dan Google Cloud Storage
-- RESTful API untuk manajemen data candi, artefak, dan tiket
-- Validasi data menggunakan Express Validator
-- Integrasi dengan database MySQL menggunakan Sequelize ORM
-- CORS support untuk integrasi dengan frontend
-- Sistem transaksi dan manajemen tiket
-- Bookmarking dan tracking artefak yang sudah dibaca
+- Autentikasi dan Otorisasi menggunakan JWT.
+- Upload dan manajemen file menggunakan Multer dan Google Cloud Storage.
+- RESTful API untuk manajemen data candi, artefak, dan tiket.
+- Validasi data menggunakan Express Validator.
+- Integrasi dengan database MySQL menggunakan Sequelize ORM.
+- CORS support untuk integrasi dengan frontend.
+- Sistem transaksi dan manajemen tiket.
+- Bookmarking dan tracking artefak yang sudah dibaca.
 
 ## 📋 Prasyarat
 Sebelum menjalankan proyek ini, pastikan Anda telah menginstal:
