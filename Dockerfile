@@ -14,9 +14,9 @@ COPY . .
 # dependencies sesuai package.json
 RUN npm install
 
-# Membuka akses jaringan pada port 5000 untuk
+# Membuka akses jaringan pada port 8080 untuk
 # koneksi eksternal
-EXPOSE 5000
+EXPOSE 8080
 
 # Perintah utama untuk menjalankan aplikasi
 # menggunakan Node.js
