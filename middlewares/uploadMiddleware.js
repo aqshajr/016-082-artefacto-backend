@@ -8,6 +8,7 @@
 const { Storage } = require('@google-cloud/storage');
 const multer = require('multer');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 /**
  * 1. Inisialisasi Google Cloud Storage
@@ -72,7 +73,28 @@ const deleteFileFromGCS = async (filename) => {
 };
 
 /**
- * Helper function untuk mendapatkan nama file berdasarkan tipe
+ * Helper function untuk generate nama file unik
+ */
+const generateUniqueFilename = (type, originalname) => {
+  const timestamp = Date.now();
+  const uuid = uuidv4().substring(0, 8); // Ambil 8 karakter pertama UUID
+  const extension = path.extname(originalname) || '.jpg';
+  
+  switch (type) {
+    case 'profilePicture':
+      return `assets/profilepicture/pp-${timestamp}-${uuid}${extension}`;
+    case 'temple':
+      return `assets/temples/temple-${timestamp}-${uuid}${extension}`;
+    case 'artifact':
+      return `assets/artifacts/artifact-${timestamp}-${uuid}${extension}`;
+    default:
+      throw new Error('Invalid file type');
+  }
+};
+
+/**
+ * Helper function untuk mendapatkan nama file berdasarkan tipe (untuk backward compatibility)
+ * Hanya digunakan untuk profile picture yang masih menggunakan userID
  */
 const getFilename = (type, id) => {
   const extension = '.jpg';
@@ -91,7 +113,7 @@ const getFilename = (type, id) => {
 /**
  * 3. Middleware uploadToGCS
  * - Mengupload file dari memory ke Google Cloud Storage
- * - Generate nama file sesuai dengan tipe dan ID
+ * - Generate nama file unik untuk temple dan artifact
  * - Set metadata dan konfigurasi upload
  * - Generate URL publik setelah upload selesai
  */
@@ -99,24 +121,17 @@ const uploadToGCS = (type) => async (req, res, next) => {
   try {
     if (!req.file) return next();
 
-    let id;
-    switch (type) {
-      case 'profilePicture':
-        id = req.user.userID;
-        break;
-      case 'temple':
-        // For new temples, we'll use a timestamp as temporary ID
-        id = req.params.id || Date.now();
-        break;
-      case 'artifact':
-        // For new artifacts, we'll use a timestamp as temporary ID
-        id = req.params.id || Date.now();
-        break;
-      default:
-        throw new Error('Invalid upload type');
+    let filename;
+    
+    if (type === 'profilePicture') {
+      // Profile picture masih menggunakan userID untuk konsistensi
+      const id = req.user.userID;
+      filename = getFilename(type, id);
+    } else {
+      // Temple dan artifact menggunakan nama file unik
+      filename = generateUniqueFilename(type, req.file.originalname);
     }
 
-    const filename = getFilename(type, id);
     const blob = bucket.file(filename);
     const blobStream = blob.createWriteStream({
       resumable: false,
@@ -149,5 +164,6 @@ module.exports = {
   uploadToGCS,
   deleteFileFromGCS,
   getFilename,
+  generateUniqueFilename,
   bucket
 }; 

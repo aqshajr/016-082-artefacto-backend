@@ -143,10 +143,13 @@ exports.createArtifact = async (req, res) => {
       });
     }
 
-    // Buat artifact dulu tanpa imageUrl
+    // Dapatkan URL gambar dari middleware upload jika ada
+    const imageUrl = req.file?.cloudStoragePublicUrl;
+
+    // Buat artifact dengan imageUrl langsung
     const artifact = await Artifact.create({
       templeID,
-      imageUrl: null, // Set null dulu
+      imageUrl,
       title,
       description,
       detailPeriod,
@@ -158,56 +161,13 @@ exports.createArtifact = async (req, res) => {
       locationUrl
     });
 
-    // Setelah artifact dibuat dan punya ID, baru handle upload gambar
-    if (req.file) {
-      try {
-        const filename = getFilename('artifact', artifact.artifactID);
-        const blob = bucket.file(filename);
-        const blobStream = blob.createWriteStream({
-          resumable: false,
-          gzip: true,
-          metadata: {
-            contentType: req.file.mimetype
-          }
-        });
-
-        await new Promise((resolve, reject) => {
-          blobStream.on('error', async (err) => {
-            console.error(err);
-            await artifact.destroy();
-            reject(new Error('Gagal mengupload gambar'));
-          });
-
-          blobStream.on('finish', async () => {
-            const imageUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_STORAGE_BUCKET}/${filename}`;
-            await artifact.update({ imageUrl });
-            resolve();
-          });
-
-          blobStream.end(req.file.buffer);
-        });
-
-        res.status(201).json({
-          status: 'sukses',
-          message: 'Artefak berhasil dibuat',
-          data: {
-            artifact
-          }
-        });
-      } catch (error) {
-        // Jika upload gagal, hapus artifact yang sudah dibuat
-        await artifact.destroy();
-        throw error;
+    res.status(201).json({
+      status: 'sukses',
+      message: 'Artefak berhasil dibuat',
+      data: {
+        artifact
       }
-    } else {
-      res.status(201).json({
-        status: 'sukses',
-        message: 'Artefak berhasil dibuat',
-        data: {
-          artifact
-        }
-      });
-    }
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -250,44 +210,8 @@ exports.updateArtifact = async (req, res) => {
       });
     }
 
-    // Handle file upload jika ada file baru
-    let imageUrl = artifact.imageUrl;
-    if (req.file) {
-      try {
-        // Hapus file lama jika ada
-        if (artifact.imageUrl) {
-          const oldFilename = getFilename('artifact', id);
-          await deleteFileFromGCS(oldFilename);
-        }
-
-        // Upload file baru
-        const filename = getFilename('artifact', id);
-        const blob = bucket.file(filename);
-        const blobStream = blob.createWriteStream({
-          resumable: false,
-          gzip: true,
-          metadata: {
-            contentType: req.file.mimetype
-          }
-        });
-
-        await new Promise((resolve, reject) => {
-          blobStream.on('error', (err) => {
-            console.error(err);
-            reject(new Error('Gagal mengupload gambar'));
-          });
-
-          blobStream.on('finish', () => {
-            imageUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_STORAGE_BUCKET}/${filename}`;
-            resolve();
-          });
-
-          blobStream.end(req.file.buffer);
-        });
-      } catch (error) {
-        throw new Error('Gagal mengupload gambar');
-      }
-    }
+    // Dapatkan URL gambar baru dari middleware upload jika ada
+    const imageUrl = req.file?.cloudStoragePublicUrl;
 
     const updateData = {
       ...(title && { title }),
@@ -335,8 +259,15 @@ exports.deleteArtifact = async (req, res) => {
 
     // Hapus gambar dari bucket jika ada
     if (artifact.imageUrl) {
-      const filename = getFilename('artifact', id);
-      await deleteFileFromGCS(filename);
+      try {
+        // Extract filename dari URL
+        const url = new URL(artifact.imageUrl);
+        const filename = url.pathname.substring(1); // Remove leading slash
+        await deleteFileFromGCS(filename);
+      } catch (error) {
+        console.error('Error deleting image:', error);
+        // Continue with deletion even if image deletion fails
+      }
     }
 
     await artifact.destroy();
