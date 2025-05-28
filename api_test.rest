@@ -10,7 +10,7 @@ Content-Type: application/json
 
 {
     "username": "tes",
-    "email": "tes@tes.com",
+    "email": "tung@sahur.com",
     "password": "password123",
     "passwordConfirmation": "password123"
 }
@@ -20,8 +20,8 @@ POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-    "email": "tes@tes.com",
-    "password": "password123"
+    "email": "admin@admin.com",
+    "password": "admin123"
 }
 
 ### Get user profile

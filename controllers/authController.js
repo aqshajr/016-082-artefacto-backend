@@ -41,7 +41,7 @@ exports.register = async (req, res) => {
 
     // Generate token JWT
     const token = jwt.sign(
-      { id: user.userID, email: user.email },
+      { id: user.userID, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -55,6 +55,7 @@ exports.register = async (req, res) => {
           id: user.userID,
           username: user.username,
           email: user.email,
+          role: user.role,
           createdAt: user.created_at
         },
         token
@@ -105,7 +106,7 @@ exports.login = async (req, res) => {
 
     // Generate token JWT
     const token = jwt.sign(
-      { id: user.userID, email: user.email },
+      { id: user.userID, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
@@ -119,7 +120,8 @@ exports.login = async (req, res) => {
           id: user.userID,
           username: user.username,
           email: user.email,
-          profilePicture: user.profilePicture
+          profilePicture: user.profilePicture,
+          role: user.role
         },
         token
       }
@@ -138,7 +140,7 @@ exports.getProfile = async (req, res) => {
   try {
     //ambil data dari input
     const user = await User.findByPk(req.user.userID, {
-      attributes: ['userID', 'username', 'email', 'profilePicture', 'created_at', 'updated_at']
+      attributes: ['userID', 'username', 'email', 'profilePicture', 'role', 'created_at', 'updated_at']
     });
 
     //kirim response
