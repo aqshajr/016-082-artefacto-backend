@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:8080/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6OCwiZW1haWwiOiJ0ZXNAdGVzLmNvbSIsImlhdCI6MTc0ODE5ODUxMCwiZXhwIjoxNzQ4Mjg0OTEwfQ.LtDDMXtRNEDyVeGrB7_BXJBBk7j_HTJW6yifMvKYc94
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJyb2xlIjp0cnVlLCJpYXQiOjE3NDg0NDM0MzUsImV4cCI6MTc0ODUyOTgzNX0.UM4x8uc8J5tLaHymBwf2hujRBqdcbejAgjJ_5swoV04
 
 ### AUTH ENDPOINTS ###
 
@@ -69,6 +69,33 @@ Authorization: Bearer {{authToken}}
 ### Get temple by ID
 GET {{baseUrl}}/temples/1
 Authorization: Bearer {{authToken}}
+
+### Create new temple without image (Admin only) - Will use placeholder
+POST {{baseUrl}}/temples
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="title"
+
+Candi Test Placeholder
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+Candi ini dibuat untuk testing placeholder image. Tidak ada gambar yang diupload sehingga akan menggunakan placeholder default.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactTitle"
+
+Placeholder Image Test
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactDescription"
+
+Candi ini menggunakan gambar placeholder default dari bucket storage.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="locationUrl"
+
+https://maps.app.goo.gl/placeholder-test
+------WebKitFormBoundary--
 
 ### Create new temple (Admin only)
 POST {{baseUrl}}/temples
@@ -147,6 +174,53 @@ Authorization: Bearer {{authToken}}
 ### Get artifact by ID
 GET {{baseUrl}}/artifacts/5
 Authorization: Bearer {{authToken}}
+
+### Create new artifact without image (Admin only) - Will use placeholder
+POST {{baseUrl}}/artifacts
+Authorization: Bearer {{authToken}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
+
+------WebKitFormBoundary
+Content-Disposition: form-data; name="templeID"
+
+1
+------WebKitFormBoundary
+Content-Disposition: form-data; name="title"
+
+Artefak Test Placeholder
+------WebKitFormBoundary
+Content-Disposition: form-data; name="description"
+
+Artefak ini dibuat untuk testing placeholder image. Tidak ada gambar yang diupload sehingga akan menggunakan placeholder default.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailPeriod"
+
+Abad ke-21 (Test)
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailMaterial"
+
+Digital placeholder
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailSize"
+
+Virtual size
+------WebKitFormBoundary
+Content-Disposition: form-data; name="detailStyle"
+
+Modern placeholder style
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactTitle"
+
+Placeholder Test
+------WebKitFormBoundary
+Content-Disposition: form-data; name="funfactDescription"
+
+Artefak ini menggunakan gambar placeholder default dari bucket storage untuk testing.
+------WebKitFormBoundary
+Content-Disposition: form-data; name="locationUrl"
+
+https://maps.app.goo.gl/artifact-placeholder-test
+------WebKitFormBoundary--
 
 ### Create new artifact (Admin only)
 POST {{baseUrl}}/artifacts

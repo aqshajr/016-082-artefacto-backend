@@ -19,7 +19,6 @@ router.post('/:id/read', idParamValidation, artifactController.markAsRead);
 router.post('/',
   isAdmin,
   uploadConfig.artifactImage,
-  uploadToGCS('artifact'),
   artifactValidation,
   artifactController.createArtifact
 );
@@ -27,7 +26,6 @@ router.post('/',
 router.put('/:id',
   isAdmin,
   uploadConfig.artifactImage,
-  uploadToGCS('artifact'),
   idParamValidation,
   updateArtifactValidation,
   artifactController.updateArtifact

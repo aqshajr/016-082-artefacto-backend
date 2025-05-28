@@ -122,6 +122,17 @@ Server akan berjalan di `http://localhost:3000` dengan fitur hot-reload.
 - `GET /api/owned-tickets` - Mendapatkan daftar tiket yang dimiliki user
 - `GET /api/owned-tickets/:id` - Mendapatkan detail tiket yang dimiliki
 
+## 🖼️ Default Image Placeholder
+
+Aplikasi ini menggunakan gambar placeholder default untuk temple dan artifact yang tidak memiliki gambar khusus:
+
+- **URL Placeholder**: `https://storage.googleapis.com/{BUCKET_NAME}/assets/image-placeholder.jpg`
+- **Implementasi**: Menggunakan Sequelize getter pada model Temple dan Artifact
+- **Behavior**: 
+  - Jika `imageUrl` adalah `null` atau kosong, akan mengembalikan URL placeholder
+  - Jika `imageUrl` memiliki nilai, akan mengembalikan URL asli
+  - Placeholder otomatis digunakan saat membuat temple/artifact tanpa upload gambar
+
 ## 🔒 Keamanan
 - Implementasi JWT untuk autentikasi
 - Password di-hash menggunakan bcrypt

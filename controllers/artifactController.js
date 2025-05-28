@@ -1,6 +1,6 @@
 const { Artifact, Temple, Bookmark, Read } = require('../models');
 const { validationResult } = require('express-validator');
-const { getFilename, bucket, deleteFileFromGCS } = require('../middlewares/uploadMiddleware');
+const { getFilename, bucket, deleteFileFromGCS, getDefaultImageUrl } = require('../middlewares/uploadMiddleware');
 
 // GET - Mendapatkan semua artefak (publik)
 exports.getAllArtifacts = async (req, res) => {
@@ -35,14 +35,25 @@ exports.getAllArtifacts = async (req, res) => {
       order: [['created_at', 'DESC']]
     });
 
+    // Pastikan setiap artifact menggunakan placeholder jika imageUrl null
+    const artifactsWithPlaceholder = artifacts.map(artifact => {
+      const artifactData = {
+        ...artifact.toJSON(),
+        isBookmarked: artifact.Bookmarks?.[0]?.isBookmark || false,
+        isRead: artifact.Reads?.[0]?.isRead || false
+      };
+      
+      if (!artifactData.imageUrl) {
+        artifactData.imageUrl = getDefaultImageUrl();
+      }
+      
+      return artifactData;
+    });
+
     res.json({
       status: 'sukses',
       data: {
-        artifacts: artifacts.map(artifact => ({
-          ...artifact.toJSON(),
-          isBookmarked: artifact.Bookmarks?.[0]?.isBookmark || false,
-          isRead: artifact.Reads?.[0]?.isRead || false
-        }))
+        artifacts: artifactsWithPlaceholder
       }
     });
   } catch (error) {
@@ -90,14 +101,21 @@ exports.getArtifactById = async (req, res) => {
       });
     }
 
+    // Pastikan imageUrl menggunakan placeholder jika null
+    const artifactData = {
+      ...artifact.toJSON(),
+      isBookmarked: artifact.Bookmarks?.[0]?.isBookmark || false,
+      isRead: artifact.Reads?.[0]?.isRead || false
+    };
+    
+    if (!artifactData.imageUrl) {
+      artifactData.imageUrl = getDefaultImageUrl();
+    }
+
     res.json({
       status: 'sukses',
       data: {
-        artifact: {
-          ...artifact.toJSON(),
-          isBookmarked: artifact.Bookmarks?.[0]?.isBookmark || false,
-          isRead: artifact.Reads?.[0]?.isRead || false
-        }
+        artifact: artifactData
       }
     });
   } catch (error) {
@@ -143,13 +161,10 @@ exports.createArtifact = async (req, res) => {
       });
     }
 
-    // Dapatkan URL gambar dari middleware upload jika ada
-    const imageUrl = req.file?.cloudStoragePublicUrl;
-
-    // Buat artifact dengan imageUrl langsung
+    // Buat artifact, model akan handle default placeholder image
     const artifact = await Artifact.create({
       templeID,
-      imageUrl,
+      imageUrl: null, // Model getter akan handle placeholder
       title,
       description,
       detailPeriod,
@@ -161,13 +176,66 @@ exports.createArtifact = async (req, res) => {
       locationUrl
     });
 
-    res.status(201).json({
-      status: 'sukses',
-      message: 'Artefak berhasil dibuat',
-      data: {
-        artifact
+    // Setelah artifact dibuat dan punya ID, baru handle upload gambar jika ada
+    if (req.file) {
+      try {
+        const filename = getFilename('artifact', artifact.artifactID);
+        const blob = bucket.file(filename);
+        const blobStream = blob.createWriteStream({
+          resumable: false,
+          gzip: true,
+          metadata: {
+            contentType: req.file.mimetype
+          }
+        });
+
+        await new Promise((resolve, reject) => {
+          blobStream.on('error', async (err) => {
+            console.error(err);
+            await artifact.destroy();
+            reject(new Error('Gagal mengupload gambar'));
+          });
+
+          blobStream.on('finish', async () => {
+            const imageUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_STORAGE_BUCKET}/${filename}`;
+            await artifact.update({ imageUrl });
+            resolve();
+          });
+
+          blobStream.end(req.file.buffer);
+        });
+
+        // Refresh artifact data after update
+        await artifact.reload();
+        const responseArtifact = artifact.toJSON();
+        
+        res.status(201).json({
+          status: 'sukses',
+          message: 'Artefak berhasil dibuat',
+          data: {
+            artifact: responseArtifact
+          }
+        });
+      } catch (error) {
+        // Jika upload gagal, hapus artifact yang sudah dibuat
+        await artifact.destroy();
+        throw error;
       }
-    });
+    } else {
+      // Tidak ada file yang diupload, gunakan placeholder default
+      const responseArtifact = artifact.toJSON();
+      if (!responseArtifact.imageUrl) {
+        responseArtifact.imageUrl = getDefaultImageUrl();
+      }
+      
+      res.status(201).json({
+        status: 'sukses',
+        message: 'Artefak berhasil dibuat',
+        data: {
+          artifact: responseArtifact
+        }
+      });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -210,8 +278,44 @@ exports.updateArtifact = async (req, res) => {
       });
     }
 
-    // Dapatkan URL gambar baru dari middleware upload jika ada
-    const imageUrl = req.file?.cloudStoragePublicUrl;
+    // Handle file upload jika ada file baru
+    let imageUrl = artifact.imageUrl;
+    if (req.file) {
+      try {
+        // Hapus file lama jika ada
+        if (artifact.imageUrl) {
+          const oldFilename = getFilename('artifact', id);
+          await deleteFileFromGCS(oldFilename);
+        }
+
+        // Upload file baru
+        const filename = getFilename('artifact', id);
+        const blob = bucket.file(filename);
+        const blobStream = blob.createWriteStream({
+          resumable: false,
+          gzip: true,
+          metadata: {
+            contentType: req.file.mimetype
+          }
+        });
+
+        await new Promise((resolve, reject) => {
+          blobStream.on('error', (err) => {
+            console.error(err);
+            reject(new Error('Gagal mengupload gambar'));
+          });
+
+          blobStream.on('finish', () => {
+            imageUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_STORAGE_BUCKET}/${filename}`;
+            resolve();
+          });
+
+          blobStream.end(req.file.buffer);
+        });
+      } catch (error) {
+        throw new Error('Gagal mengupload gambar');
+      }
+    }
 
     const updateData = {
       ...(title && { title }),
@@ -228,11 +332,17 @@ exports.updateArtifact = async (req, res) => {
 
     await artifact.update(updateData);
 
+    // Pastikan imageUrl menggunakan placeholder jika null
+    const responseArtifact = artifact.toJSON();
+    if (!responseArtifact.imageUrl) {
+      responseArtifact.imageUrl = getDefaultImageUrl();
+    }
+
     res.json({
       status: 'sukses',
       message: 'Artefak berhasil diperbarui',
       data: {
-        artifact
+        artifact: responseArtifact
       }
     });
   } catch (error) {
@@ -259,15 +369,8 @@ exports.deleteArtifact = async (req, res) => {
 
     // Hapus gambar dari bucket jika ada
     if (artifact.imageUrl) {
-      try {
-        // Extract filename dari URL
-        const url = new URL(artifact.imageUrl);
-        const filename = url.pathname.substring(1); // Remove leading slash
-        await deleteFileFromGCS(filename);
-      } catch (error) {
-        console.error('Error deleting image:', error);
-        // Continue with deletion even if image deletion fails
-      }
+      const filename = getFilename('artifact', id);
+      await deleteFileFromGCS(filename);
     }
 
     await artifact.destroy();

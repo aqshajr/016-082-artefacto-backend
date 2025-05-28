@@ -11,7 +11,14 @@ const Temple = sequelize.define('Temple', {
   imageUrl: {
     type: DataTypes.STRING(255),
     allowNull: true,
-    field: 'image_url'
+    field: 'image_url',
+    get() {
+      const value = this.getDataValue('imageUrl');
+      if (!value) {
+        return `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_STORAGE_BUCKET}/assets/image-placeholder.jpg`;
+      }
+      return value;
+    }
   },
   title: {
     type: DataTypes.STRING(255),

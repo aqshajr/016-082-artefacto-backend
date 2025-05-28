@@ -17,7 +17,6 @@ router.get('/:id', idParamValidation, templeController.getTempleById);
 router.post('/',
   isAdmin,
   uploadConfig.templeImage,
-  uploadToGCS('temple'),
   templeValidation,
   templeController.createTemple
 );
