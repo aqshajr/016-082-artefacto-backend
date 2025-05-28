@@ -54,8 +54,19 @@ exports.getTempleById = async (req, res) => {
 // POST - Membuat candi baru (admin)
 exports.createTemple = async (req, res) => {
   try {
+    console.log('=== CreateTemple Debug ===');
+    console.log('Request body:', req.body);
+    console.log('Request file:', req.file ? {
+      fieldname: req.file.fieldname,
+      originalname: req.file.originalname,
+      mimetype: req.file.mimetype,
+      size: req.file.size
+    } : 'No file received');
+    console.log('=== End Debug ===');
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+      console.log('Validation errors:', errors.array());
       return res.status(400).json({
         status: 'error',
         message: 'Error validasi',
@@ -81,10 +92,15 @@ exports.createTemple = async (req, res) => {
       locationUrl
     });
 
-    // Setelah temple dibuat dan punya ID, baru handle upload gambar
+    console.log('Temple created with ID:', temple.templeID);
+
+    // Handle upload gambar jika ada
     if (req.file) {
+      console.log('Processing image upload...');
       try {
         const filename = getFilename('temple', temple.templeID);
+        console.log('Generated filename:', filename);
+        
         const blob = bucket.file(filename);
         const blobStream = blob.createWriteStream({
           resumable: false,
@@ -96,43 +112,51 @@ exports.createTemple = async (req, res) => {
 
         await new Promise((resolve, reject) => {
           blobStream.on('error', async (err) => {
-            console.error(err);
+            console.error('GCS Upload Error:', err);
             await temple.destroy();
             reject(new Error('Gagal mengupload gambar'));
           });
 
           blobStream.on('finish', async () => {
-            const imageUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_STORAGE_BUCKET}/${filename}`;
-            await temple.update({ imageUrl });
-            resolve();
+            try {
+              const imageUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_STORAGE_BUCKET}/${filename}`;
+              console.log('Updating temple with imageUrl:', imageUrl);
+              await temple.update({ imageUrl });
+              console.log('Image uploaded successfully:', imageUrl);
+              resolve();
+            } catch (updateError) {
+              console.error('Error updating temple with imageUrl:', updateError);
+              reject(updateError);
+            }
           });
 
           blobStream.end(req.file.buffer);
         });
 
-        res.status(201).json({
-          status: 'sukses',
-          message: 'Candi berhasil dibuat',
-          data: {
-            temple
-          }
-        });
+        // Refresh temple data to get updated imageUrl
+        await temple.reload();
+        console.log('Temple after reload:', temple.toJSON());
       } catch (error) {
+        console.error('Image upload failed:', error);
         // Jika upload gagal, hapus temple yang sudah dibuat
         await temple.destroy();
         throw error;
       }
     } else {
-      res.status(201).json({
-        status: 'sukses',
-        message: 'Candi berhasil dibuat',
-        data: {
-          temple
-        }
-      });
+      console.log('No file to upload');
     }
+
+    // Send response after everything is complete
+    res.status(201).json({
+      status: 'sukses',
+      message: 'Candi berhasil dibuat',
+      data: {
+        temple
+      }
+    });
+
   } catch (error) {
-    console.error(error);
+    console.error('CreateTemple Error:', error);
     res.status(500).json({
       status: 'error',
       message: error.message || 'Terjadi kesalahan pada server'
