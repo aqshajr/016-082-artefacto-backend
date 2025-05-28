@@ -55,13 +55,19 @@ exports.getTempleById = async (req, res) => {
 exports.createTemple = async (req, res) => {
   try {
     console.log('=== CreateTemple Debug ===');
+    console.log('Request headers:', req.headers);
     console.log('Request body:', req.body);
     console.log('Request file:', req.file ? {
       fieldname: req.file.fieldname,
       originalname: req.file.originalname,
       mimetype: req.file.mimetype,
-      size: req.file.size
+      size: req.file.size,
+      buffer: req.file.buffer ? `Buffer(${req.file.buffer.length} bytes)` : 'No buffer'
     } : 'No file received');
+    console.log('Environment check:');
+    console.log('- GOOGLE_CLOUD_PROJECT:', process.env.GOOGLE_CLOUD_PROJECT ? 'Set' : 'Missing');
+    console.log('- GOOGLE_CLOUD_STORAGE_BUCKET:', process.env.GOOGLE_CLOUD_STORAGE_BUCKET ? 'Set' : 'Missing');
+    console.log('- GOOGLE_APPLICATION_CREDENTIALS:', process.env.GOOGLE_APPLICATION_CREDENTIALS ? 'Set' : 'Missing');
     console.log('=== End Debug ===');
 
     const errors = validationResult(req);
@@ -101,6 +107,11 @@ exports.createTemple = async (req, res) => {
         const filename = getFilename('temple', temple.templeID);
         console.log('Generated filename:', filename);
         
+        // Check if bucket is accessible
+        console.log('Testing bucket access...');
+        const bucketExists = await bucket.exists();
+        console.log('Bucket exists:', bucketExists);
+        
         const blob = bucket.file(filename);
         const blobStream = blob.createWriteStream({
           resumable: false,
@@ -110,17 +121,24 @@ exports.createTemple = async (req, res) => {
           }
         });
 
+        console.log('Starting upload stream...');
+
         await new Promise((resolve, reject) => {
           blobStream.on('error', async (err) => {
             console.error('GCS Upload Error:', err);
+            console.error('Error details:', {
+              message: err.message,
+              code: err.code,
+              stack: err.stack
+            });
             await temple.destroy();
-            reject(new Error('Gagal mengupload gambar'));
+            reject(new Error('Gagal mengupload gambar: ' + err.message));
           });
 
           blobStream.on('finish', async () => {
             try {
               const imageUrl = `https://storage.googleapis.com/${process.env.GOOGLE_CLOUD_STORAGE_BUCKET}/${filename}`;
-              console.log('Updating temple with imageUrl:', imageUrl);
+              console.log('Upload finished, updating temple with imageUrl:', imageUrl);
               await temple.update({ imageUrl });
               console.log('Image uploaded successfully:', imageUrl);
               resolve();
@@ -130,6 +148,7 @@ exports.createTemple = async (req, res) => {
             }
           });
 
+          console.log('Writing file buffer to stream...');
           blobStream.end(req.file.buffer);
         });
 
@@ -138,12 +157,17 @@ exports.createTemple = async (req, res) => {
         console.log('Temple after reload:', temple.toJSON());
       } catch (error) {
         console.error('Image upload failed:', error);
+        console.error('Error stack:', error.stack);
         // Jika upload gagal, hapus temple yang sudah dibuat
         await temple.destroy();
         throw error;
       }
     } else {
-      console.log('No file to upload');
+      console.log('No file to upload - this might be the issue!');
+      console.log('Possible causes:');
+      console.log('1. Multer middleware not working');
+      console.log('2. File field name mismatch');
+      console.log('3. Content-Type header issues');
     }
 
     // Send response after everything is complete
@@ -157,6 +181,7 @@ exports.createTemple = async (req, res) => {
 
   } catch (error) {
     console.error('CreateTemple Error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       status: 'error',
       message: error.message || 'Terjadi kesalahan pada server'
