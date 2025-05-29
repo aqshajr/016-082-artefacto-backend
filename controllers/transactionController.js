@@ -2,13 +2,10 @@ const { Transaction, Ticket, Temple, OwnedTicket } = require('../models');
 const { validationResult } = require('express-validator');
 const crypto = require('crypto');
 
-// Get all transactions for current user
-exports.getTransactions = async (req, res) => {
+// Get ALL transactions (Admin only) - without userID filtering
+exports.getAllTransactionsAdmin = async (req, res) => {
   try {
-    const userID = req.user.userID;
-    
     const transactions = await Transaction.findAll({
-      where: { userID },
       include: [{
         model: Ticket,
         include: [{
@@ -22,46 +19,6 @@ exports.getTransactions = async (req, res) => {
     res.json({
       status: 'sukses',
       data: { transactions }
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Terjadi kesalahan pada server'
-    });
-  }
-};
-
-// Get transaction by ID
-exports.getTransactionById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const userID = req.user.userID;
-
-    const transaction = await Transaction.findOne({
-      where: { 
-        transactionID: id,
-        userID 
-      },
-      include: [{
-        model: Ticket,
-        include: [{
-          model: Temple,
-          attributes: ['title', 'locationUrl']
-        }]
-      }]
-    });
-
-    if (!transaction) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Transaksi tidak ditemukan'
-      });
-    }
-
-    res.json({
-      status: 'sukses',
-      data: { transaction }
     });
   } catch (error) {
     console.error(error);

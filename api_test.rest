@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:8080/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJyb2xlIjp0cnVlLCJpYXQiOjE3NDg0NDM0MzUsImV4cCI6MTc0ODUyOTgzNX0.UM4x8uc8J5tLaHymBwf2hujRBqdcbejAgjJ_5swoV04
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJyb2xlIjp0cnVlLCJpYXQiOjE3NDg0OTM0MTksImV4cCI6MTc0ODU3OTgxOX0.t1wD_K89dew7Q5ePErMhjdAPI0lm8o5RcOAQAkJ_eiA
 
 ### AUTH ENDPOINTS ###
 
@@ -350,7 +350,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "templeID": 1,
+    "templeID": 19,
     "description": "Tiket masuk untuk pengunjung Anak Anak",
     "price": 50000
 }
@@ -371,12 +371,8 @@ Authorization: Bearer {{authToken}}
 
 ### TRANSACTION ENDPOINTS ###
 
-### Get all transactions
-GET {{baseUrl}}/transactions
-Authorization: Bearer {{authToken}}
-
-### Get transaction by ID
-GET {{baseUrl}}/transactions/1
+### Get ALL transactions (Admin only)
+GET {{baseUrl}}/transactions/admin/all
 Authorization: Bearer {{authToken}}
 
 ### Create new transaction
@@ -385,7 +381,7 @@ Authorization: Bearer {{authToken}}
 Content-Type: application/json
 
 {
-    "ticketID": 3,
+    "ticketID": 8,
     "ticketQuantity": 5,
     "validDate": "2025-12-31"
 }
