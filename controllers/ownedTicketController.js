@@ -1,4 +1,4 @@
-const { OwnedTicket, Ticket, Temple } = require('../models');
+const { OwnedTicket, Ticket, Temple, Transaction } = require('../models');
 const { validationResult } = require('express-validator');
 const crypto = require('crypto');
 
@@ -15,6 +15,9 @@ exports.getOwnedTickets = async (req, res) => {
           model: Temple,
           attributes: ['title', 'locationUrl']
         }]
+      }, {
+        model: Transaction,
+        attributes: ['transactionID', 'validDate', 'totalPrice', 'transactionDate', 'status']
       }],
       order: [['ownedTicketID', 'DESC']]
     });
@@ -49,6 +52,9 @@ exports.getOwnedTicketById = async (req, res) => {
           model: Temple,
           attributes: ['title', 'locationUrl']
         }]
+      }, {
+        model: Transaction,
+        attributes: ['transactionID', 'validDate', 'totalPrice', 'transactionDate', 'status']
       }]
     });
 
@@ -84,7 +90,7 @@ exports.createOwnedTicket = async (req, res) => {
       });
     }
 
-    const { ticketID, validDate } = req.body;
+    const { ticketID, transactionID } = req.body;
     const userID = req.user.userID;
 
     // Generate unique code
@@ -93,11 +99,9 @@ exports.createOwnedTicket = async (req, res) => {
     const ownedTicket = await OwnedTicket.create({
       userID,
       ticketID,
+      transactionID,
       uniqueCode,
-      validDate,
-      usageStatus: 'Belum Digunakan',
-      created_at: new Date(),
-      updated_at: new Date()
+      usageStatus: 'Belum Digunakan'
     });
 
     res.status(201).json({
@@ -157,6 +161,9 @@ exports.updateUsageStatus = async (req, res) => {
           model: Temple,
           attributes: ['title', 'locationUrl']
         }]
+      }, {
+        model: Transaction,
+        attributes: ['transactionID', 'validDate', 'totalPrice', 'transactionDate', 'status']
       }]
     });
 

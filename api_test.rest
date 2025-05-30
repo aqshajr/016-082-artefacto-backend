@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:8080/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImVtYWlsIjoidHVuZ0BzYWh1ci5jb20iLCJyb2xlIjpmYWxzZSwiaWF0IjoxNzQ4NTY1MjY0LCJleHAiOjE3NDg2NTE2NjR9.NZ4JzqbGN_XzNmCPZ53k0IYylyF-EoX5jfI8DcQD1cU
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImVtYWlsIjoidHVuZ0BzYWh1ci5jb20iLCJyb2xlIjpmYWxzZSwiaWF0IjoxNzQ4NTcwOTk2LCJleHAiOjE3NDg2NTczOTZ9.uSONbBELKloLWprYqCxHu4Mf2euHeVfMe8qnjRpM03o
 
 ### AUTH ENDPOINTS ###
 
@@ -391,11 +391,13 @@ Content-Type: application/json
 
 {
     "ticketID": 8,
-    "ticketQuantity": 5,
-    "validDate": "2025-12-31"
+    "ticketQuantity": 3,
+    "validDate": "2025-06-01"
 }
 
 ### OWNED TICKET ENDPOINTS ###
+### Note: Owned tickets are automatically created when a transaction is made
+### Direct creation is for admin/special purposes only
 
 ### Get all owned tickets
 GET {{baseUrl}}/owned-tickets
@@ -404,6 +406,16 @@ Authorization: Bearer {{authToken}}
 ### Get owned ticket by ID
 GET {{baseUrl}}/owned-tickets/2
 Authorization: Bearer {{authToken}}
+
+### Create owned ticket directly (requires transactionID)
+POST {{baseUrl}}/owned-tickets
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+    "ticketID": 8,
+    "transactionID": 1
+}
 
 ### Update owned ticket usage status (mark as used)
 PUT {{baseUrl}}/owned-tickets/51/use

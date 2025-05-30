@@ -247,14 +247,14 @@ exports.ownedTicketValidation = [
       }
       return true;
     }),
-  body('validDate')
-    .notEmpty().withMessage('Tanggal berlaku wajib diisi')
-    .isISO8601().withMessage('Format tanggal tidak valid')
-    .custom((value) => {
-      const date = new Date(value);
-      const now = new Date();
-      if (date < now) {
-        throw new Error('Tanggal berlaku harus di masa depan');
+  body('transactionID')
+    .notEmpty().withMessage('ID Transaksi wajib diisi')
+    .isInt().withMessage('ID Transaksi harus berupa angka')
+    .custom(async (value) => {
+      const { Transaction } = require('../models');
+      const transaction = await Transaction.findByPk(value);
+      if (!transaction) {
+        throw new Error('Transaksi tidak ditemukan');
       }
       return true;
     })

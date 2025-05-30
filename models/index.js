@@ -41,6 +41,10 @@ Transaction.belongsTo(Ticket, { foreignKey: 'ticketID' });
 Ticket.hasMany(OwnedTicket, { foreignKey: 'ticketID' });
 OwnedTicket.belongsTo(Ticket, { foreignKey: 'ticketID' });
 
+// Transaction associations
+Transaction.hasMany(OwnedTicket, { foreignKey: 'transactionID' });
+OwnedTicket.belongsTo(Transaction, { foreignKey: 'transactionID' });
+
 module.exports = {
   User,
   Temple,

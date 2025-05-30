@@ -28,6 +28,11 @@ const OwnedTicket = sequelize.define('OwnedTicket', {
       key: 'ticketID'
     }
   },
+  transactionID: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    field: 'transactionID'
+  },
   uniqueCode: {
     type: DataTypes.STRING(255),
     allowNull: false,
