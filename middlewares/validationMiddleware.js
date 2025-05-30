@@ -183,8 +183,12 @@ exports.transactionValidation = [
     .custom((value) => {
       const date = new Date(value);
       const now = new Date();
-      if (date < now) {
-        throw new Error('Tanggal berlaku harus di masa depan');
+      // Set waktu ke awal hari untuk perbandingan tanggal saja
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const ticketDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      
+      if (ticketDate < today) {
+        throw new Error('Tanggal berlaku tidak boleh di masa lalu');
       }
       return true;
     }),
