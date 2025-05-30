@@ -113,3 +113,63 @@ exports.createOwnedTicket = async (req, res) => {
     });
   }
 };
+
+// Update usage status of owned ticket
+exports.updateUsageStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userID = req.user.userID;
+
+    // Find the owned ticket belonging to the current user
+    const ownedTicket = await OwnedTicket.findOne({
+      where: { 
+        ownedTicketID: id,
+        userID 
+      }
+    });
+
+    if (!ownedTicket) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'Tiket tidak ditemukan'
+      });
+    }
+
+    // Check if ticket is already used
+    if (ownedTicket.usageStatus === 'Sudah Digunakan') {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Tiket sudah pernah digunakan'
+      });
+    }
+
+    // Update usage status
+    await ownedTicket.update({
+      usageStatus: 'Sudah Digunakan'
+    });
+
+    // Fetch updated ticket with related data
+    const updatedTicket = await OwnedTicket.findOne({
+      where: { ownedTicketID: id },
+      include: [{
+        model: Ticket,
+        include: [{
+          model: Temple,
+          attributes: ['title', 'locationUrl']
+        }]
+      }]
+    });
+
+    res.json({
+      status: 'sukses',
+      message: 'Status penggunaan tiket berhasil diperbarui',
+      data: { ownedTicket: updatedTicket }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Terjadi kesalahan pada server'
+    });
+  }
+};

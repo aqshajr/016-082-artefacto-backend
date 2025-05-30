@@ -11,5 +11,6 @@ router.use(authenticateToken);
 router.get('/', ownedTicketController.getOwnedTickets);
 router.get('/:id', idParamValidation, ownedTicketController.getOwnedTicketById);
 router.post('/', ownedTicketValidation, ownedTicketController.createOwnedTicket);
+router.put('/:id/use', idParamValidation, ownedTicketController.updateUsageStatus);
 
 module.exports = router;

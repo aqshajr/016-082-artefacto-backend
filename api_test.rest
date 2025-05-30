@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:8080/api
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwiZW1haWwiOiJhZG1pbkBhZG1pbi5jb20iLCJyb2xlIjp0cnVlLCJpYXQiOjE3NDg0OTM0MTksImV4cCI6MTc0ODU3OTgxOX0.t1wD_K89dew7Q5ePErMhjdAPI0lm8o5RcOAQAkJ_eiA
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImVtYWlsIjoidHVuZ0BzYWh1ci5jb20iLCJyb2xlIjpmYWxzZSwiaWF0IjoxNzQ4NTY1MjY0LCJleHAiOjE3NDg2NTE2NjR9.NZ4JzqbGN_XzNmCPZ53k0IYylyF-EoX5jfI8DcQD1cU
 
 ### AUTH ENDPOINTS ###
 
@@ -13,6 +13,15 @@ Content-Type: application/json
     "email": "tung@sahur.com",
     "password": "password123",
     "passwordConfirmation": "password123"
+}
+
+### Login user
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "tung@sahur.com",
+    "password": "password123"
 }
 
 ### Login user
@@ -394,4 +403,8 @@ Authorization: Bearer {{authToken}}
 
 ### Get owned ticket by ID
 GET {{baseUrl}}/owned-tickets/2
+Authorization: Bearer {{authToken}}
+
+### Update owned ticket usage status (mark as used)
+PUT {{baseUrl}}/owned-tickets/51/use
 Authorization: Bearer {{authToken}} 
