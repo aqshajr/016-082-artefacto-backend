@@ -7,6 +7,7 @@ const artifactRoutes = require('./artifactRoutes');
 const ticketRoutes = require('./ticketRoutes');
 const transactionRoutes = require('./transactionRoutes');
 const ownedTicketRoutes = require('./ownedTicketRoutes');
+const mlRoutes = require('./mlRoutes');
 
 router.use('/auth', authRoutes);
 router.use('/temples', templeRoutes);
@@ -14,5 +15,6 @@ router.use('/artifacts', artifactRoutes);
 router.use('/tickets', ticketRoutes);
 router.use('/transactions', transactionRoutes);
 router.use('/owned-tickets', ownedTicketRoutes);
+router.use('/ml', mlRoutes);
 
 module.exports = router; 
