@@ -17,30 +17,8 @@ steps:
         '--memory', '512Mi',
         '--cpu', '1',
         '--min-instances', '0',
-        '--max-instances', '10',
-        '--set-env-vars', 'NODE_ENV=production',
-        '--set-env-vars', 'PORT=8080',
-        # Database environment variables - sesuaikan dengan konfigurasi Anda
-        '--set-env-vars', 'DB_HOST=${_DB_HOST}',
-        '--set-env-vars', 'DB_USER=${_DB_USER}',
-        '--set-env-vars', 'DB_PASSWORD=${_DB_PASSWORD}',
-        '--set-env-vars', 'DB_NAME=${_DB_NAME}',
-        '--set-env-vars', 'DB_PORT=${_DB_PORT}',
-        '--set-env-vars', 'JWT_SECRET=${_JWT_SECRET}',
-        '--set-env-vars', 'GOOGLE_CLOUD_PROJECT=${PROJECT_ID}',
-        '--set-env-vars', 'GOOGLE_CLOUD_STORAGE_BUCKET=${_STORAGE_BUCKET}',
-        '--set-env-vars', 'GOOGLE_APPLICATION_CREDENTIALS=/etc/secrets/service-account-key.json'
+        '--max-instances', '10'
       ]
-
-# Substitution variables - set these in Cloud Build trigger
-substitutions:
-  _DB_HOST: 'your-db-host'
-  _DB_USER: 'your-db-user' 
-  _DB_PASSWORD: 'your-db-password'
-  _DB_NAME: 'your-db-name'
-  _DB_PORT: '3306'
-  _JWT_SECRET: 'your-jwt-secret'
-  _STORAGE_BUCKET: 'your-storage-bucket'
 
 images:
   - 'gcr.io/$PROJECT_ID/artefacto-backend'
