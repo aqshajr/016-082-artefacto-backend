@@ -1,5 +1,5 @@
 ### Variables
-@baseUrl = http://localhost:8080/api
+@baseUrl = https://artefacto-backend-749281711221.us-central1.run.app/api
 @authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTgsImVtYWlsIjoidHVuZ0BzYWh1ci5jb20iLCJyb2xlIjpmYWxzZSwiaWF0IjoxNzQ4NTcwOTk2LCJleHAiOjE3NDg2NTczOTZ9.uSONbBELKloLWprYqCxHu4Mf2euHeVfMe8qnjRpM03o
 
 ### AUTH ENDPOINTS ###
