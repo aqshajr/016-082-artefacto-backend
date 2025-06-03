@@ -2,22 +2,42 @@
 # dengan distro Alpine Linux (ukuran ringan)
 FROM node:20-alpine
 
-# Mengkonfigurasi direktori utama dalam
-#container sebagai /app
+# Install dumb-init untuk proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Mengkonfigurasi direktori utama dalam container sebagai /app
 WORKDIR /app
 
-# Melakukan copy semua file proyek dari host
-# ke dalam container
-COPY . .
+# Create non-root user untuk security
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
 
-# Proses instalasi seluruh package
-# dependencies sesuai package.json
-RUN npm install
+# Copy package files terlebih dahulu untuk better caching
+COPY package*.json ./
 
-# Membuka akses jaringan pada port 8080 untuk
-# koneksi eksternal
+# Proses instalasi dependencies production only
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy semua file aplikasi
+COPY --chown=nodejs:nodejs . .
+
+# Switch ke non-root user
+USER nodejs
+
+# Membuka akses jaringan pada port 8080 untuk koneksi eksternal
 EXPOSE 8080
 
-# Perintah utama untuk menjalankan aplikasi
-# menggunakan Node.js
-CMD ["node", "server.js"]
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "const http = require('http'); \
+    http.get('http://localhost:8080/health', (res) => { \
+      if (res.statusCode === 200) process.exit(0); \
+      else process.exit(1); \
+    }).on('error', () => process.exit(1));"
+
+# Perintah utama menggunakan dumb-init untuk proper signal handling
+CMD ["dumb-init", "node", "server.js"]
