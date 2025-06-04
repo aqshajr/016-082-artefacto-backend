@@ -90,37 +90,51 @@ Server akan berjalan di `http://localhost:3000` dengan fitur hot-reload.
 ### Autentikasi
 - `POST /api/auth/register` - Registrasi pengguna baru
 - `POST /api/auth/login` - Login pengguna
-- `GET /api/auth/profile` - Mendapatkan profil pengguna
-- `PUT /api/auth/profile` - Memperbarui profil pengguna
-- `DELETE /api/auth/profile` - Menghapus akun pengguna
+- `GET /api/auth/profile` - Mendapatkan profil pengguna (Protected)
+- `PUT /api/auth/profile` - Memperbarui profil pengguna (Protected, dengan upload gambar profil)
+- `DELETE /api/auth/profile` - Menghapus akun pengguna (Protected)
 
-### Candi
-- `GET /api/temples` - Mendapatkan daftar candi
-- `POST /api/temples` - Menambah candi baru (Admin only)
-- `PUT /api/temples/:id` - Mengupdate candi (Admin only)
+### Candi (Temples)
+- `GET /api/temples` - Mendapatkan daftar candi (Protected)
+- `GET /api/temples/:id` - Mendapatkan detail candi berdasarkan ID (Protected)
+- `POST /api/temples` - Menambah candi baru (Admin only, dengan upload gambar)
+- `PUT /api/temples/:id` - Mengupdate candi (Admin only, dengan upload gambar)
 - `DELETE /api/temples/:id` - Menghapus candi (Admin only)
 
-### Artefak
-- `GET /api/artifacts` - Mendapatkan daftar artefak
-- `POST /api/artifacts` - Menambah artefak baru (Admin only)
-- `PUT /api/artifacts/:id` - Mengupdate artefak (Admin only)
+### Artefak (Artifacts)
+- `GET /api/artifacts` - Mendapatkan daftar artefak (Protected)
+- `GET /api/artifacts/:id` - Mendapatkan detail artefak berdasarkan ID (Protected)
+- `POST /api/artifacts/:id/bookmark` - Toggle bookmark artefak (Protected)
+- `POST /api/artifacts/:id/read` - Tandai artefak sebagai sudah dibaca (Protected)
+- `POST /api/artifacts` - Menambah artefak baru (Admin only, dengan upload gambar)
+- `PUT /api/artifacts/:id` - Mengupdate artefak (Admin only, dengan upload gambar)
 - `DELETE /api/artifacts/:id` - Menghapus artefak (Admin only)
-- `POST /api/artifacts/:id/bookmark` - Toggle bookmark artefak
-- `POST /api/artifacts/:id/read` - Tandai artefak sebagai sudah dibaca
 
-### Tiket
-- `GET /api/tickets` - Mendapatkan daftar tiket
+### Tiket (Tickets)
+- `GET /api/tickets` - Mendapatkan daftar tiket (Protected)
+- `GET /api/tickets/:id` - Mendapatkan detail tiket berdasarkan ID (Protected)
 - `POST /api/tickets` - Menambah tiket baru (Admin only)
 - `PUT /api/tickets/:id` - Mengupdate tiket (Admin only)
 - `DELETE /api/tickets/:id` - Menghapus tiket (Admin only)
 
-### Transaksi
-- `GET /api/transactions` - Mendapatkan daftar transaksi user
-- `POST /api/transactions` - Membuat transaksi baru
+### Transaksi (Transactions)
+- `GET /api/transactions/admin/all` - Mendapatkan semua transaksi (Admin only)
+- `POST /api/transactions` - Membuat transaksi baru (Protected)
 
-### Tiket Dimiliki
-- `GET /api/owned-tickets` - Mendapatkan daftar tiket yang dimiliki user
-- `GET /api/owned-tickets/:id` - Mendapatkan detail tiket yang dimiliki
+### Tiket yang Dimiliki (Owned Tickets)
+- `GET /api/owned-tickets` - Mendapatkan daftar tiket yang dimiliki user (Protected)
+- `GET /api/owned-tickets/:id` - Mendapatkan detail tiket yang dimiliki (Protected)
+- `POST /api/owned-tickets` - Membuat tiket yang dimiliki baru (Protected)
+- `PUT /api/owned-tickets/:id/use` - Update status penggunaan tiket (Protected)
+
+### Machine Learning (ML)
+- `POST /api/ml/predict` - Prediksi gambar menggunakan model ML (dengan upload file gambar)
+
+### Keterangan:
+- **Protected**: Memerlukan token autentikasi JWT
+- **Admin only**: Memerlukan token autentikasi JWT dan role admin
+- **Upload gambar**: Mendukung upload file gambar (jpg, jpeg, png)
+- **File upload**: Mendukung upload file untuk prediksi ML
 
 ## 🖼️ Default Image Placeholder
 
