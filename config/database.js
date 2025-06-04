@@ -8,15 +8,15 @@
 // 3. Password database (DB_PASSWORD)
 // 4. Host database (DB_HOST)
 // 5. Port database (DB_PORT)
-// 6. Dialect: MySQL
-// 7. Logging: Hanya aktif di development
-// 8. Connection pool settings
+// 6. Pool connection
+// 7. Logging mode
 
 // Import library yang dibutuhkan
 const { Sequelize } = require('sequelize');     // ORM Sequelize
 require('dotenv').config();                     // Load environment variables
 
 // === Inisialisasi Koneksi Database ===
+// Membuat instance Sequelize dengan konfigurasi dari environment variables
 const sequelize = new Sequelize(
   process.env.DB_NAME,        // Nama database
   process.env.DB_USER,        // Username database
@@ -26,15 +26,15 @@ const sequelize = new Sequelize(
     port: process.env.DB_PORT,    // Port database
     dialect: 'mysql',             // Jenis database yang digunakan
     
-    // Logging hanya aktif di development
+    // Logging hanya aktif di mode development
     logging: process.env.NODE_ENV === 'development' ? console.log : false,
     
     // Konfigurasi connection pool
     pool: {
       max: 5,        // Maksimal 5 koneksi
       min: 0,        // Minimal 0 koneksi
-      acquire: 30000, // Timeout untuk mendapatkan koneksi (30 detik)
-      idle: 10000    // Waktu idle sebelum koneksi dilepas (10 detik)
+      acquire: 30000, // Waktu maksimal (ms) untuk mendapatkan koneksi
+      idle: 10000    // Waktu maksimal (ms) koneksi idle sebelum dilepas
     }
   }
 );
