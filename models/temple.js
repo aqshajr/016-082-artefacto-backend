@@ -39,7 +39,7 @@ const Temple = sequelize.define('Temple', {
     field: 'funfact_description'
   },
   locationUrl: {
-    type: DataTypes.STRING(255),
+    type: DataTypes.STRING(500),
     allowNull: true,
     field: 'location_url'
   }

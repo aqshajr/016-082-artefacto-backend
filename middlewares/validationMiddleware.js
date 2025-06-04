@@ -50,6 +50,7 @@ exports.templeValidation = [
   body('locationUrl')
     .notEmpty().withMessage('URL lokasi wajib diisi')
     .isURL().withMessage('Format URL lokasi tidak valid')
+    .isLength({ max: 500 }).withMessage('URL lokasi maksimal 500 karakter')
 ];
 
 //validasi artifact =====================================================================
@@ -87,6 +88,7 @@ exports.artifactValidation = [
   body('locationUrl')
     .notEmpty().withMessage('URL lokasi wajib diisi')
     .isURL().withMessage('Format URL lokasi tidak valid')
+    .isLength({ max: 500 }).withMessage('URL lokasi maksimal 500 karakter')
 ];
 
 // Validasi untuk update artifact (semua field optional)
@@ -123,6 +125,7 @@ exports.updateArtifactValidation = [
     .optional()
     .notEmpty().withMessage('URL lokasi tidak boleh kosong')
     .isURL().withMessage('Format URL lokasi tidak valid')
+    .isLength({ max: 500 }).withMessage('URL lokasi maksimal 500 karakter')
 ];
 
 //validasi ticket =====================================================================
