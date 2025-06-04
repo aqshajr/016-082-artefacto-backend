@@ -1,9 +1,18 @@
-//validationMiddleware.js: Untuk validasi input
+// ===================================
+// Middleware Validasi Input
+// ===================================
+// Fungsi: Memvalidasi input dari request sebelum diproses
+// Menggunakan express-validator untuk:
+// 1. Validasi body request
+// 2. Validasi parameter URL
+// 3. Validasi query string
+// 4. Custom validasi dengan database
 
-const { body, param, query } = require('express-validator');
-const { Temple, Ticket } = require('../models');
+const { body, param, query } = require('express-validator');  // Library untuk validasi
+const { Temple, Ticket } = require('../models');             // Model untuk validasi foreign key
 
-//validasi register ===============================================================
+// === Validasi Autentikasi ===
+// Validasi input registrasi user baru
 exports.registerValidation = [
   body('username')
     .notEmpty().withMessage('Username wajib diisi')
@@ -24,7 +33,7 @@ exports.registerValidation = [
     })
 ];
 
-//validasi login =====================================================================
+// Validasi input login
 exports.loginValidation = [
   body('email')
     .notEmpty().withMessage('Email wajib diisi')
@@ -33,7 +42,8 @@ exports.loginValidation = [
     .notEmpty().withMessage('Password wajib diisi')
 ];
 
-//validasi temple =====================================================================
+// === Validasi Data Candi ===
+// Validasi input data candi baru/update
 exports.templeValidation = [
   body('title')
     .notEmpty().withMessage('Judul candi wajib diisi')
@@ -53,8 +63,10 @@ exports.templeValidation = [
     .isLength({ max: 500 }).withMessage('URL lokasi maksimal 500 karakter')
 ];
 
-//validasi artifact =====================================================================
+// === Validasi Data Artefak ===
+// Validasi input artefak baru
 exports.artifactValidation = [
+  // Validasi foreign key ke candi
   body('templeID')
     .notEmpty().withMessage('ID Candi wajib diisi')
     .isInt().withMessage('ID Candi harus berupa angka')
@@ -65,12 +77,14 @@ exports.artifactValidation = [
       }
       return true;
     }),
+  // Validasi data utama artefak
   body('title')
     .notEmpty().withMessage('Judul artefak wajib diisi')
     .isLength({ min: 3 }).withMessage('Judul minimal 3 karakter'),
   body('description')
     .notEmpty().withMessage('Deskripsi artefak wajib diisi')
     .isLength({ min: 10 }).withMessage('Deskripsi minimal 10 karakter'),
+  // Validasi detail artefak
   body('detailPeriod')
     .notEmpty().withMessage('Detail periode wajib diisi'),
   body('detailMaterial')
@@ -79,19 +93,21 @@ exports.artifactValidation = [
     .notEmpty().withMessage('Detail ukuran wajib diisi'),
   body('detailStyle')
     .notEmpty().withMessage('Detail gaya wajib diisi'),
+  // Validasi funfact
   body('funfactTitle')
     .notEmpty().withMessage('Judul funfact wajib diisi')
     .isLength({ min: 3 }).withMessage('Judul funfact minimal 3 karakter'),
   body('funfactDescription')
     .notEmpty().withMessage('Deskripsi funfact wajib diisi')
     .isLength({ min: 10 }).withMessage('Deskripsi funfact minimal 10 karakter'),
+  // Validasi lokasi
   body('locationUrl')
     .notEmpty().withMessage('URL lokasi wajib diisi')
     .isURL().withMessage('Format URL lokasi tidak valid')
     .isLength({ max: 500 }).withMessage('URL lokasi maksimal 500 karakter')
 ];
 
-// Validasi untuk update artifact (semua field optional)
+// Validasi update artefak (semua field optional)
 exports.updateArtifactValidation = [
   body('title')
     .optional()
@@ -128,8 +144,10 @@ exports.updateArtifactValidation = [
     .isLength({ max: 500 }).withMessage('URL lokasi maksimal 500 karakter')
 ];
 
-//validasi ticket =====================================================================
+// === Validasi Data Tiket ===
+// Validasi input tiket baru
 exports.ticketValidation = [
+  // Validasi foreign key ke candi
   body('templeID')
     .notEmpty().withMessage('ID candi wajib diisi')
     .isInt().withMessage('ID candi harus berupa angka')
@@ -140,6 +158,7 @@ exports.ticketValidation = [
       }
       return true;
     }),
+  // Validasi harga dan deskripsi
   body('price')
     .notEmpty().withMessage('Harga tiket wajib diisi')
     .isFloat({ min: 0 }).withMessage('Harga tiket harus berupa angka positif'),
@@ -148,7 +167,7 @@ exports.ticketValidation = [
     .isLength({ min: 10 }).withMessage('Deskripsi minimal 10 karakter')
 ];
 
-// Validasi untuk update ticket (semua field optional)
+// Validasi update tiket (semua field optional)
 exports.updateTicketValidation = [
   body('templeID')
     .optional()
@@ -168,8 +187,10 @@ exports.updateTicketValidation = [
     .isLength({ min: 10 }).withMessage('Deskripsi minimal 10 karakter')
 ];
 
-//validasi transaction =====================================================================
+// === Validasi Transaksi ===
+// Validasi pembuatan transaksi baru
 exports.transactionValidation = [
+  // Validasi tiket yang dibeli
   body('ticketID')
     .notEmpty().withMessage('ID Tiket wajib diisi')
     .isInt().withMessage('ID Tiket harus berupa angka')
@@ -180,6 +201,7 @@ exports.transactionValidation = [
       }
       return true;
     }),
+  // Validasi tanggal penggunaan
   body('validDate')
     .notEmpty().withMessage('Tanggal berlaku wajib diisi')
     .isISO8601().withMessage('Format tanggal tidak valid')
@@ -195,17 +217,20 @@ exports.transactionValidation = [
       }
       return true;
     }),
+  // Validasi jumlah tiket
   body('ticketQuantity')
     .notEmpty().withMessage('Jumlah tiket wajib diisi')
     .isInt({ min: 1 }).withMessage('Jumlah tiket minimal 1')
 ];
 
-//validasi idParam =====================================================================
+// === Validasi Parameter dan Query ===
+// Validasi parameter ID di URL
 exports.idParamValidation = [
   param('id')
     .isInt().withMessage('ID harus berupa angka')
 ];
 
+// Validasi parameter paginasi
 exports.paginationValidation = [
   query('page')
     .optional()
@@ -215,8 +240,10 @@ exports.paginationValidation = [
     .isInt({ min: 1, max: 100 }).withMessage('Batas harus antara 1 dan 100')
 ];
 
-//validasi updateProfile =====================================================================
+// === Validasi Update Profil ===
+// Validasi data update profil user
 exports.updateProfileValidation = [
+  // Data profil
   body('username')
     .optional()
     .notEmpty().withMessage('Username wajib diisi')
@@ -225,6 +252,7 @@ exports.updateProfileValidation = [
     .optional()
     .notEmpty().withMessage('Email wajib diisi')
     .isEmail().withMessage('Format email tidak valid'),
+  // Validasi password
   body('currentPassword')
     .optional()
     .notEmpty().withMessage('Password saat ini wajib diisi'),
@@ -242,8 +270,10 @@ exports.updateProfileValidation = [
     })
 ];
 
-//validasi ownedTicket =====================================================================
+// === Validasi Tiket yang Dimiliki ===
+// Validasi pembuatan record tiket yang dimiliki
 exports.ownedTicketValidation = [
+  // Validasi tiket yang dibeli
   body('ticketID')
     .notEmpty().withMessage('ID Tiket wajib diisi')
     .isInt().withMessage('ID Tiket harus berupa angka')

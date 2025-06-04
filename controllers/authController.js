@@ -1,15 +1,28 @@
-//authController.js: Untuk mengontrol autentikasi pengguna
+// ===================================
+// Controller Autentikasi
+// ===================================
+// Fungsi: Menangani operasi terkait autentikasi user
+// Fitur:
+// 1. Register user baru
+// 2. Login user
+// 3. Mendapatkan profil user
+// 4. Update profil user
+// 5. Hapus akun user
 
-const jwt = require('jsonwebtoken');
-const { User } = require('../models');
-const { validationResult } = require('express-validator');
-const bcrypt = require('bcrypt');
-const { deleteFileFromGCS, getFilename } = require('../middlewares/uploadMiddleware');
+// Import library dan model yang dibutuhkan
+const jwt = require('jsonwebtoken');              // Library untuk generate token JWT
+const { User } = require('../models');            // Model User dari database
+const { validationResult } = require('express-validator');  // Validasi input
+const bcrypt = require('bcrypt');                 // Library untuk hashing password
+const { deleteFileFromGCS, getFilename } = require('../middlewares/uploadMiddleware');  // Upload handler
 
-//register: Untuk mendaftarkan pengguna baru ================================================
+// === Register User ===
+// Fungsi: Mendaftarkan user baru ke sistem
+// Method: POST
+// Endpoint: /api/auth/register
 exports.register = async (req, res) => {
   try {
-    //validasi input dari middleware
+    // === Tahap 1: Validasi Input ===
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -19,10 +32,10 @@ exports.register = async (req, res) => {
       });
     }
 
-    //ambil data dari input
+    // === Tahap 2: Ambil Data Input ===
     const { username, email, password } = req.body;
 
-    // Cek apakah email sudah terdaftar
+    // === Tahap 3: Cek Email Duplikat ===
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({
@@ -31,7 +44,8 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Buat pengguna baru dan hash password
+    // === Tahap 4: Buat User Baru ===
+    // Password akan di-hash otomatis oleh hook di model User
     const user = await User.create({
       username,
       email,
@@ -39,14 +53,14 @@ exports.register = async (req, res) => {
       profilePicture: 'https://storage.googleapis.com/' + process.env.GOOGLE_CLOUD_STORAGE_BUCKET + '/assets/profilepicture/pp-default.jpg'
     });
 
-    // Generate token JWT
+    // === Tahap 5: Generate Token JWT ===
     const token = jwt.sign(
       { id: user.userID, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
-    //kirim response
+    // === Tahap 6: Kirim Response ===
     res.status(201).json({
       status: 'sukses',
       message: 'Pengguna berhasil didaftarkan',
@@ -62,6 +76,7 @@ exports.register = async (req, res) => {
       }
     });
   } catch (error) {
+    // === Error Handling ===
     console.error(error);
     res.status(500).json({
       status: 'error',
@@ -70,10 +85,13 @@ exports.register = async (req, res) => {
   }
 };
 
-//login: Untuk login pengguna ==================================================================
+// === Login User ===
+// Fungsi: Melakukan autentikasi user
+// Method: POST
+// Endpoint: /api/auth/login
 exports.login = async (req, res) => {
   try {
-    //validasi input dari middleware
+    // === Tahap 1: Validasi Input ===
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -83,10 +101,10 @@ exports.login = async (req, res) => {
       });
     }
 
-    //ambil data dari input
+    // === Tahap 2: Ambil Data Input ===
     const { email, password } = req.body;
 
-    // Cari pengguna berdasarkan email
+    // === Tahap 3: Cek User Exists ===
     const user = await User.findOne({ where: { email } });
     if (!user) {
       return res.status(401).json({
@@ -95,7 +113,7 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Verifikasi password
+    // === Tahap 4: Validasi Password ===
     const isValidPassword = await user.validatePassword(password);
     if (!isValidPassword) {
       return res.status(401).json({
@@ -104,14 +122,14 @@ exports.login = async (req, res) => {
       });
     }
 
-    // Generate token JWT
+    // === Tahap 5: Generate Token JWT ===
     const token = jwt.sign(
       { id: user.userID, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
 
-    //kirim response
+    // === Tahap 6: Kirim Response ===
     res.json({
       status: 'sukses',
       message: 'Login berhasil',
@@ -127,6 +145,7 @@ exports.login = async (req, res) => {
       }
     });
   } catch (error) {
+    // === Error Handling ===
     console.error(error);
     res.status(500).json({
       status: 'error',
@@ -135,15 +154,18 @@ exports.login = async (req, res) => {
   }
 };
 
-//getProfile: Untuk mengambil profil pengguna ================================================
+// === Get Profile ===
+// Fungsi: Mengambil data profil user
+// Method: GET
+// Endpoint: /api/auth/profile
 exports.getProfile = async (req, res) => {
   try {
-    //ambil data dari input
+    // === Tahap 1: Ambil Data User ===
     const user = await User.findByPk(req.user.userID, {
       attributes: ['userID', 'username', 'email', 'profilePicture', 'role', 'created_at', 'updated_at']
     });
 
-    //kirim response
+    // === Tahap 2: Validasi User Exists ===
     if (!user) {
       return res.status(404).json({
         status: 'error',
@@ -151,7 +173,7 @@ exports.getProfile = async (req, res) => {
       });
     }
 
-    //kirim response
+    // === Tahap 3: Kirim Response ===
     res.json({
       status: 'sukses',
       data: {
@@ -159,6 +181,7 @@ exports.getProfile = async (req, res) => {
       }
     });
   } catch (error) {
+    // === Error Handling ===
     console.error(error);
     res.status(500).json({
       status: 'error',
@@ -167,9 +190,13 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-//updateProfile: Untuk memperbarui profil pengguna ==========================================       
+// === Update Profile ===
+// Fungsi: Memperbarui data profil user
+// Method: PUT
+// Endpoint: /api/auth/profile
 exports.updateProfile = async (req, res) => {
   try {
+    // === Tahap 1: Validasi Input ===
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -179,10 +206,12 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
+    // === Tahap 2: Ambil Data Input ===
     const { username, email, currentPassword, newPassword } = req.body;
     const userId = req.user.userID;
     const profilePicture = req.file?.cloudStoragePublicUrl;
 
+    // === Tahap 3: Validasi User Exists ===
     const user = await User.findByPk(userId);
     if (!user) {
       return res.status(404).json({
@@ -191,7 +220,7 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
-    // Jika ada perubahan password
+    // === Tahap 4: Update Password (Jika Ada) ===
     if (currentPassword && newPassword) {
       const isValidPassword = await user.validatePassword(currentPassword);
       if (!isValidPassword) {
@@ -205,7 +234,7 @@ exports.updateProfile = async (req, res) => {
       user.password = hashedPassword;
     }
 
-    // Jika ada perubahan email, cek duplikat
+    // === Tahap 5: Update Email (Jika Ada) ===
     if (email && email !== user.email) {
       const existingUser = await User.findOne({ where: { email } });
       if (existingUser) {
@@ -217,13 +246,14 @@ exports.updateProfile = async (req, res) => {
       user.email = email;
     }
 
-    // Update data lainnya
+    // === Tahap 6: Update Data Lainnya ===
     if (username) user.username = username;
     if (profilePicture) user.profilePicture = profilePicture;
     user.updated_at = new Date();
 
     await user.save();
 
+    // === Tahap 7: Kirim Response ===
     res.json({
       status: 'sukses',
       message: 'Profil berhasil diperbarui',
@@ -240,6 +270,7 @@ exports.updateProfile = async (req, res) => {
       }
     });
   } catch (error) {
+    // === Error Handling ===
     console.error(error);
     res.status(500).json({
       status: 'error',

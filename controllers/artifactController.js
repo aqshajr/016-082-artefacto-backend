@@ -1,15 +1,43 @@
-const { Artifact, Temple, Bookmark, Read } = require('../models');
-const { validationResult } = require('express-validator');
-const { getFilename, bucket, deleteFileFromGCS, getDefaultImageUrl } = require('../middlewares/uploadMiddleware');
+// ===================================
+// Controller Artefak/Artifact
+// ===================================
+// Fungsi: Menangani operasi terkait data artefak
+// Fitur:
+// 1. Mendapatkan semua data artefak
+// 2. Mendapatkan detail artefak
+// 3. Membuat artefak baru (admin)
+// 4. Memperbarui data artefak (admin)
+// 5. Menghapus artefak (admin)
+// 6. Menandai artefak sebagai dibookmark
+// 7. Menandai artefak sebagai dibaca
 
-// GET - Mendapatkan semua artefak (publik)
+// Import library dan model yang dibutuhkan
+const { Artifact, Temple, Bookmark, Read } = require('../models');  // Model dari database
+const { validationResult } = require('express-validator');         // Validasi input
+const { 
+  getFilename,                                                     // Generate nama file
+  bucket,                                                         // Instance bucket GCS
+  deleteFileFromGCS,                                              // Hapus file dari GCS
+  getDefaultImageUrl                                              // URL gambar default
+} = require('../middlewares/uploadMiddleware');                    // Upload handler
+
+// === Get All Artifacts ===
+// Fungsi: Mendapatkan daftar semua artefak
+// Method: GET
+// Endpoint: /api/artifacts
+// Query Params:
+// - templeId: Filter artefak berdasarkan candi (opsional)
+// Akses: Public
 exports.getAllArtifacts = async (req, res) => {
   try {
+    // === Tahap 1: Ambil Parameter ===
     const { templeId } = req.query;
     const userId = req.user?.userID; // Optional: jika user login
 
+    // === Tahap 2: Setup Query ===
     const whereClause = templeId ? { templeID: templeId } : {};
 
+    // === Tahap 3: Ambil Data Artefak ===
     const artifacts = await Artifact.findAll({
       where: whereClause,
       include: [
@@ -35,7 +63,8 @@ exports.getAllArtifacts = async (req, res) => {
       order: [['created_at', 'DESC']]
     });
 
-    // Pastikan setiap artifact menggunakan placeholder jika imageUrl null
+    // === Tahap 4: Format Response ===
+    // Set gambar default dan status bookmark/read
     const artifactsWithPlaceholder = artifacts.map(artifact => {
       const artifactData = {
         ...artifact.toJSON(),
@@ -50,6 +79,7 @@ exports.getAllArtifacts = async (req, res) => {
       return artifactData;
     });
 
+    // === Tahap 5: Kirim Response ===
     res.json({
       status: 'sukses',
       data: {
@@ -57,6 +87,7 @@ exports.getAllArtifacts = async (req, res) => {
       }
     });
   } catch (error) {
+    // === Error Handling ===
     console.error(error);
     res.status(500).json({
       status: 'error',
@@ -65,12 +96,18 @@ exports.getAllArtifacts = async (req, res) => {
   }
 };
 
-// GET - Mendapatkan detail artefak (publik)
+// === Get Artifact By ID ===
+// Fungsi: Mendapatkan detail satu artefak
+// Method: GET
+// Endpoint: /api/artifacts/:id
+// Akses: Public
 exports.getArtifactById = async (req, res) => {
   try {
+    // === Tahap 1: Ambil Parameter ===
     const { id } = req.params;
     const userId = req.user?.userID; // Optional: jika user login
 
+    // === Tahap 2: Ambil Data Artefak ===
     const artifact = await Artifact.findByPk(id, {
       include: [
         {
@@ -94,6 +131,7 @@ exports.getArtifactById = async (req, res) => {
       ]
     });
 
+    // === Tahap 3: Validasi Keberadaan Artefak ===
     if (!artifact) {
       return res.status(404).json({
         status: 'error',
@@ -101,7 +139,8 @@ exports.getArtifactById = async (req, res) => {
       });
     }
 
-    // Pastikan imageUrl menggunakan placeholder jika null
+    // === Tahap 4: Format Response ===
+    // Set gambar default dan status bookmark/read
     const artifactData = {
       ...artifact.toJSON(),
       isBookmarked: artifact.Bookmarks?.[0]?.isBookmark || false,
@@ -112,6 +151,7 @@ exports.getArtifactById = async (req, res) => {
       artifactData.imageUrl = getDefaultImageUrl();
     }
 
+    // === Tahap 5: Kirim Response ===
     res.json({
       status: 'sukses',
       data: {
@@ -119,6 +159,7 @@ exports.getArtifactById = async (req, res) => {
       }
     });
   } catch (error) {
+    // === Error Handling ===
     console.error(error);
     res.status(500).json({
       status: 'error',
@@ -127,9 +168,14 @@ exports.getArtifactById = async (req, res) => {
   }
 };
 
-// POST - Membuat artefak baru (admin)
+// === Create Artifact ===
+// Fungsi: Membuat data artefak baru
+// Method: POST
+// Endpoint: /api/artifacts
+// Akses: Admin only
 exports.createArtifact = async (req, res) => {
   try {
+    // === Tahap 1: Validasi Input ===
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({
@@ -139,6 +185,7 @@ exports.createArtifact = async (req, res) => {
       });
     }
 
+    // === Tahap 2: Ambil Data Input ===
     const {
       templeID,
       title,
@@ -152,7 +199,7 @@ exports.createArtifact = async (req, res) => {
       locationUrl
     } = req.body;
 
-    // Cek apakah candi ada
+    // === Tahap 3: Validasi Candi ===
     const temple = await Temple.findByPk(templeID);
     if (!temple) {
       return res.status(404).json({
@@ -161,7 +208,7 @@ exports.createArtifact = async (req, res) => {
       });
     }
 
-    // Buat artifact, model akan handle default placeholder image
+    // === Tahap 4: Buat Record Artefak ===
     const artifact = await Artifact.create({
       templeID,
       imageUrl: null, // Model getter akan handle placeholder
@@ -176,10 +223,13 @@ exports.createArtifact = async (req, res) => {
       locationUrl
     });
 
-    // Setelah artifact dibuat dan punya ID, baru handle upload gambar jika ada
+    // === Tahap 5: Upload Gambar (Jika Ada) ===
     if (req.file) {
       try {
+        // Generate nama file
         const filename = getFilename('artifact', artifact.artifactID);
+        
+        // Setup upload stream
         const blob = bucket.file(filename);
         const blobStream = blob.createWriteStream({
           resumable: false,
@@ -189,6 +239,7 @@ exports.createArtifact = async (req, res) => {
           }
         });
 
+        // Upload file ke GCS
         await new Promise((resolve, reject) => {
           blobStream.on('error', async (err) => {
             console.error(err);
@@ -205,10 +256,11 @@ exports.createArtifact = async (req, res) => {
           blobStream.end(req.file.buffer);
         });
 
-        // Refresh artifact data after update
+        // Refresh data
         await artifact.reload();
         const responseArtifact = artifact.toJSON();
         
+        // === Tahap 6: Kirim Response (Dengan Gambar) ===
         res.status(201).json({
           status: 'sukses',
           message: 'Artefak berhasil dibuat',
@@ -217,12 +269,12 @@ exports.createArtifact = async (req, res) => {
           }
         });
       } catch (error) {
-        // Jika upload gagal, hapus artifact yang sudah dibuat
+        // Handle error upload
         await artifact.destroy();
         throw error;
       }
     } else {
-      // Tidak ada file yang diupload, gunakan placeholder default
+      // === Tahap 6: Kirim Response (Tanpa Gambar) ===
       const responseArtifact = artifact.toJSON();
       if (!responseArtifact.imageUrl) {
         responseArtifact.imageUrl = getDefaultImageUrl();
@@ -237,6 +289,7 @@ exports.createArtifact = async (req, res) => {
       });
     }
   } catch (error) {
+    // === Error Handling ===
     console.error(error);
     res.status(500).json({
       status: 'error',
@@ -245,7 +298,11 @@ exports.createArtifact = async (req, res) => {
   }
 };
 
-// PUT - Memperbarui artefak (admin)
+// === Update Artifact ===
+// Fungsi: Memperbarui data artefak
+// Method: PUT
+// Endpoint: /api/artifacts/:id
+// Akses: Admin only
 exports.updateArtifact = async (req, res) => {
   try {
     const errors = validationResult(req);

@@ -1,15 +1,22 @@
+// Import library dan middleware yang dibutuhkan
 const express = require('express');
 const router = express.Router();
-const transactionController = require('../controllers/transactionController');
-const { transactionValidation } = require('../middlewares/validationMiddleware');
-const authenticateToken = require('../middlewares/authMiddleware');
-const isAdmin = require('../middlewares/adminMiddleware');
+const transactionController = require('../controllers/transactionController');  // Controller untuk transaksi
+const { transactionValidation } = require('../middlewares/validationMiddleware');  // Validasi input transaksi
+const authenticateToken = require('../middlewares/authMiddleware');  // Middleware untuk cek token JWT
+const isAdmin = require('../middlewares/adminMiddleware');  // Middleware untuk cek role admin
 
-// Semua rute memerlukan autentikasi
+// Semua endpoint di route ini memerlukan login (autentikasi)
 router.use(authenticateToken);
 
-// Rute transaksi
+// === Route untuk transaksi ===
+// Mendapatkan semua data transaksi (khusus admin)
+// GET /api/transactions/admin/all
 router.get('/admin/all', isAdmin, transactionController.getAllTransactionsAdmin);
+
+// Membuat transaksi baru (untuk user)
+// POST /api/transactions
+// Memerlukan: data transaksi yang valid
 router.post('/', transactionValidation, transactionController.createTransaction);
 
 module.exports = router;
