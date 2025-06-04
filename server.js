@@ -47,7 +47,7 @@ app.use((err, req, res, next) => {
 // Get PORT from environment variable
 const PORT = process.env.PORT || 8080;
 
-// PERBAIKAN UTAMA: Start server dulu, database connection async
+// Start server dulu, database connection async
 const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server berjalan pada port ${PORT}`);
   console.log(`Health check tersedia di http://localhost:${PORT}/health`);
