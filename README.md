@@ -65,7 +65,7 @@ Sebelum menjalankan proyek ini, pastikan Anda telah menginstal:
     bash
     npm run dev
 
-Server akan berjalan di `http://localhost:3000` dengan fitur hot-reload.
+
 
 ### Mode Production
     bash
